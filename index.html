@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#020617">
+  <meta name="description" content="CraftResume PRO — criador de currículos moderno.">
+  <title>CraftResume PRO — Criador de Currículos</title>
+
+  <!-- GitHub Pages friendly: all app code is in this single HTML. -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif']
+          }
+        }
+      }
+    };
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+  <style>
+    :root { --accent:#2563eb; }
+    * { box-sizing:border-box; }
+    html,body { margin:0; min-height:100%; }
+    body { font-family:Inter,ui-sans-serif,system-ui,sans-serif; }
+    .custom-scrollbar::-webkit-scrollbar{width:7px;height:7px}
+    .custom-scrollbar::-webkit-scrollbar-track{background:rgba(15,23,42,.35)}
+    .custom-scrollbar::-webkit-scrollbar-thumb{background:#334155;border-radius:999px}
+    .a4-paper{width:210mm;min-height:297mm}
+    .preview-stage{min-height:calc(100vh - 64px)}
+    .glass{background:rgba(15,23,42,.58);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+    .focus-accent:focus{border-color:var(--accent)!important;box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 16%,transparent)}
+    .template-card.active{border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 25%,transparent)}
+    .color-dot.active{box-shadow:0 0 0 2px #fff,0 0 0 4px #0f172a}
+    .toast{transform:translateY(20px);opacity:0;pointer-events:none;transition:.25s}
+    .toast.show{transform:translateY(0);opacity:1}
+    .watermark{user-select:none}
+    .mobile-tab{
+      min-height:52px;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+      gap:3px;color:#64748b;font-size:10px;font-weight:700;transition:.2s
+    }
+    .mobile-tab.active{
+      color:#fff;background:rgba(37,99,235,.14);box-shadow:inset 0 0 0 1px rgba(59,130,246,.2)
+    }
+    .mobile-tab-icon{font-size:17px;line-height:1}
+    @media(max-width:1023px){
+      .preview-stage{min-height:auto}
+      .a4-paper{width:210mm;min-height:297mm}
+      #previewScale{transform-origin:top center}
+      body.mobile-edit-mode .preview-stage,
+      body.mobile-design-mode .preview-stage{display:none}
+      body.mobile-preview-mode .editor-panel{display:none}
+      body.mobile-preview-mode .preview-stage{
+        display:flex;
+        min-height:calc(100vh - 64px);
+        height:calc(100vh - 64px);
+        padding:12px 8px 86px;
+        overflow:auto;
+        align-items:flex-start;
+        justify-content:center;
+      }
+      body.mobile-preview-mode #previewScale{
+        width:210mm;
+        flex:0 0 210mm;
+        transform-origin:top center!important;
+        margin-top:2px;
+      }
+      body.mobile-preview-mode #resume-document{
+        width:210mm;
+        min-height:297mm;
+      }
+      body.mobile-design-mode .editor-panel{display:block}
+      body.mobile-design-mode #editorForms{display:none}
+      body.mobile-edit-mode .editor-panel{display:block}
+      body.mobile-edit-mode #designControls > .grid,
+      body.mobile-edit-mode #designControls > .mt-4{display:none}
+      body.mobile-edit-mode #designControls{padding-bottom:14px}
+      body.mobile-edit-mode #designControls h2{font-size:18px}
+      body.mobile-design-mode #designControls{position:relative;top:auto}
+      body.mobile-design-mode #designControls > .mt-4{display:block}
+      body.mobile-design-mode #designControls > .grid{display:grid}
+      body.mobile-design-mode #designControls #saveStatus{display:block}
+      body.mobile-preview-mode #previewScale{transform-origin:top center!important}
+      body.mobile-preview-mode .preview-toolbar{margin-bottom:10px}
+      body.mobile-preview-mode #resume-document{box-shadow:0 20px 50px -20px rgba(0,0,0,.85)}
+      .editor-panel{padding-bottom:78px}
+    }
+    @media(max-width:600px){
+      .a4-paper{width:210mm;min-height:297mm}
+    }
+    @media print{
+      body{background:#fff!important}
+      header,.editor-panel,.preview-toolbar,.watermark,.mobile-nav,.no-print{display:none!important}
+      .preview-stage{display:block!important;padding:0!important;background:#fff!important}
+      #previewScale{transform:none!important}
+      #resume-document{box-shadow:none!important}
+    }
+  </style>
+</head>
+
+<body class="bg-slate-950 text-slate-100 antialiased">
+  <header class="h-16 border-b border-slate-800/80 glass sticky top-0 z-50 flex items-center justify-between px-4 md:px-6">
+    <div class="flex items-center gap-3 min-w-0">
+      <div class="h-9 w-9 shrink-0 rounded-xl bg-gradient-to-tr from-blue-600 to-violet-600 flex items-center justify-center font-extrabold shadow-lg">CV</div>
+      <div class="min-w-0">
+        <div class="font-extrabold tracking-tight text-base md:text-lg truncate">CraftResume <span class="text-[10px] text-blue-400 border border-blue-500/30 px-2 py-0.5 rounded-full">PRO</span></div>
+        <div class="hidden md:block text-[10px] text-slate-500">Seu currículo, em poucos minutos.</div>
+      </div>
+    </div>
+
+    <div class="hidden sm:flex items-center gap-3 bg-slate-800/50 border border-slate-700/60 px-4 py-2 rounded-full">
+      <span class="text-xs text-slate-400">Força do CV: <strong id="progressText" class="text-white">0%</strong></span>
+      <div class="w-24 md:w-32 h-2 bg-slate-700 rounded-full overflow-hidden">
+        <div id="progressBar" class="h-full rounded-full bg-gradient-to-r from-blue-500 to-emerald-400 transition-all duration-500" style="width:0%"></div>
+      </div>
+    </div>
+
+    <button id="downloadTop" class="rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 px-4 md:px-5 py-2.5 text-xs md:text-sm font-bold shadow-lg shadow-blue-600/20 hover:brightness-110 active:scale-95 transition">
+      🔒 <span class="hidden xs:inline">Desbloquear / </span>Baixar PDF
+    </button>
+  </header>
+
+  <main class="flex flex-col lg:flex-row">
+    <!-- EDITOR -->
+    <section class="editor-panel w-full lg:w-[45%] lg:h-[calc(100vh-4rem)] lg:overflow-y-auto custom-scrollbar border-r border-slate-800/80 bg-slate-900/35">
+      <div id="designControls" class="sticky top-0 z-30 glass border-b border-slate-800/70 p-4 md:p-6">
+        <div class="flex items-center justify-between gap-3">
+          <div>
+            <p class="text-[10px] font-bold uppercase tracking-[.18em] text-slate-500">Editor</p>
+            <h2 class="text-lg font-extrabold">Monte seu currículo</h2>
+          </div>
+          <span id="saveStatus" class="text-[10px] text-emerald-400">● Salvo</span>
+        </div>
+
+        <div class="mt-4 flex items-center justify-between">
+          <div class="flex gap-2">
+            <button class="color-dot active w-7 h-7 rounded-full bg-blue-600" data-color="#2563eb" aria-label="Azul"></button>
+            <button class="color-dot w-7 h-7 rounded-full bg-violet-600" data-color="#7c3aed" aria-label="Violeta"></button>
+            <button class="color-dot w-7 h-7 rounded-full bg-emerald-500" data-color="#10b981" aria-label="Verde"></button>
+            <button class="color-dot w-7 h-7 rounded-full bg-amber-500" data-color="#d97706" aria-label="Âmbar"></button>
+            <button class="color-dot w-7 h-7 rounded-full bg-rose-600" data-color="#e11d48" aria-label="Rosa"></button>
+          </div>
+          <div class="flex items-center gap-1 bg-slate-800 border border-slate-700 rounded-lg p-1">
+            <button id="zoomMinus" class="px-2 py-1 rounded hover:bg-slate-700">−</button>
+            <span id="zoomLabel" class="px-2 text-[11px] font-mono text-slate-400">70%</span>
+            <button id="zoomPlus" class="px-2 py-1 rounded hover:bg-slate-700">+</button>
+          </div>
+        </div>
+
+        <div class="mt-4 grid grid-cols-3 gap-2">
+          <button class="template-card active rounded-xl border border-slate-700 bg-slate-800/60 p-2 text-left" data-template="executive">
+            <div class="h-12 rounded-lg bg-slate-950 mb-2 overflow-hidden"><div class="h-full w-1/3 bg-slate-800"></div></div>
+            <span class="text-[10px] font-bold">Executive</span>
+          </button>
+          <button class="template-card rounded-xl border border-slate-700 bg-slate-800/60 p-2 text-left" data-template="clean">
+            <div class="h-12 rounded-lg bg-white mb-2"></div>
+            <span class="text-[10px] font-bold">ATS Clean</span>
+          </button>
+          <button class="template-card rounded-xl border border-slate-700 bg-slate-800/60 p-2 text-left" data-template="creative">
+            <div class="h-12 rounded-lg bg-white mb-2"><div class="h-2 bg-violet-500"></div></div>
+            <span class="text-[10px] font-bold">Creative</span>
+          </button>
+        </div>
+      </div>
+
+      <div id="editorForms" class="p-4 md:p-6 space-y-6">
+        <section>
+          <h3 class="mb-3 text-xs font-bold uppercase tracking-wider text-blue-400">Informações pessoais</h3>
+          <div class="grid md:grid-cols-2 gap-3">
+            <label class="block"><span class="label">Nome completo</span><input id="name" class="field focus-accent" value="Lucas Silveira"></label>
+            <label class="block"><span class="label">Cargo pretendido</span><input id="title" class="field focus-accent" value="Engenheiro de Software Sênior"></label>
+            <label class="block"><span class="label">E-mail</span><input id="email" type="email" class="field focus-accent" value="lucas.silveira@tech.com"></label>
+            <label class="block"><span class="label">Telefone / WhatsApp</span><input id="phone" class="field focus-accent" value="(11) 98765-4321"></label>
+            <label class="block md:col-span-2"><span class="label">Cidade / Estado</span><input id="location" class="field focus-accent" value="São Paulo, SP"></label>
+          </div>
+        </section>
+
+        <section class="border-t border-slate-800/70 pt-5">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-blue-400">Resumo profissional</h3>
+            <button id="summarySuggestion" class="text-[10px] text-blue-400 hover:text-blue-300">✨ Sugestão</button>
+          </div>
+          <textarea id="summary" rows="5" class="field focus-accent resize-y">Desenvolvedor Full-Stack com 8+ anos de experiência na criação de sistemas distribuídos de alta escala, arquiteturas orientadas a eventos e interfaces web de alta performance.</textarea>
+        </section>
+
+        <section class="border-t border-slate-800/70 pt-5">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-blue-400">Experiência profissional</h3>
+            <button id="addExperience" class="text-[11px] font-bold text-blue-400 hover:text-blue-300">+ Adicionar</button>
+          </div>
+          <div id="experienceList" class="space-y-4"></div>
+        </section>
+
+        <section class="border-t border-slate-800/70 pt-5">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-blue-400">Formação</h3>
+            <button id="addEducation" class="text-[11px] font-bold text-blue-400 hover:text-blue-300">+ Adicionar</button>
+          </div>
+          <div id="educationList" class="space-y-4"></div>
+        </section>
+
+        <section class="border-t border-slate-800/70 pt-5">
+          <h3 class="mb-3 text-xs font-bold uppercase tracking-wider text-blue-400">Habilidades</h3>
+          <label class="block"><span class="label">Separe por vírgulas</span><input id="skills" class="field focus-accent" value="React, Next.js, TypeScript, Node.js, Tailwind CSS, AWS"></label>
+        </section>
+
+        <section class="border-t border-slate-800/70 pt-5">
+          <h3 class="mb-3 text-xs font-bold uppercase tracking-wider text-blue-400">Idiomas</h3>
+          <input id="languages" class="field focus-accent" value="Português — Nativo, Inglês — Avançado">
+        </section>
+
+        <section class="border-t border-slate-800/70 pt-5">
+          <h3 class="mb-3 text-xs font-bold uppercase tracking-wider text-blue-400">Certificações</h3>
+          <textarea id="certifications" rows="3" class="field focus-accent">AWS Certified Developer
+Meta Front-End Developer</textarea>
+        </section>
+
+        <section class="border-t border-slate-800/70 pt-5">
+          <h3 class="mb-3 text-xs font-bold uppercase tracking-wider text-blue-400">Personalização</h3>
+          <div class="grid grid-cols-2 gap-3">
+            <label class="block"><span class="label">Fonte</span><select id="fontSelect" class="field"><option value="Inter">Inter</option><option value="Plus Jakarta Sans">Plus Jakarta Sans</option><option value="Arial">Arial</option></select></label>
+            <label class="block"><span class="label">Tamanho</span><select id="fontSize" class="field"><option value="normal">Normal</option><option value="compact">Compacto</option><option value="large">Grande</option></select></label>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <!-- PREVIEW -->
+    <section class="preview-stage w-full lg:w-[55%] bg-slate-950 flex-1 flex flex-col items-center p-3 md:p-6 overflow-auto custom-scrollbar">
+      <div class="preview-toolbar w-full max-w-4xl flex items-center justify-between mb-4 text-xs text-slate-500">
+        <span>Prévia em tempo real</span>
+        <span>A4 • <span id="previewTemplateName">Modern Executive</span></span>
+      </div>
+
+      <div id="previewScale" style="transform:scale(.7); transform-origin:top center; margin-bottom:-89mm;">
+        <div id="resume-document" class="a4-paper relative bg-white text-slate-800 shadow-[0_25px_70px_-20px_rgba(0,0,0,.8)] rounded-sm overflow-hidden">
+          <div id="watermark" class="watermark absolute inset-0 z-30 pointer-events-none flex items-center justify-center">
+            <div class="-rotate-[35deg] text-center font-black text-slate-900/10 tracking-widest text-5xl leading-relaxed">
+              PRÉVIA<br><span class="text-2xl">DESBLOQUEIE PARA BAIXAR</span>
+            </div>
+          </div>
+
+          <div id="resumeContent" class="min-h-[297mm] flex">
+            <aside id="resumeSidebar" class="w-[32%] bg-slate-900 text-white p-8 flex flex-col">
+              <div>
+                <h1 id="pName" class="text-2xl font-extrabold leading-tight">Lucas Silveira</h1>
+                <p id="pTitle" class="text-[11px] font-bold uppercase tracking-wider mt-2" style="color:var(--accent)">Engenheiro de Software Sênior</p>
+                <div class="mt-7 space-y-2 text-[10px] text-slate-300">
+                  <div id="pEmail"></div><div id="pPhone"></div><div id="pLocation"></div>
+                </div>
+                <div class="mt-7 pt-5 border-t border-slate-700">
+                  <h3 class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-3">Competências</h3>
+                  <div id="pSkills" class="flex flex-wrap gap-1.5"></div>
+                </div>
+                <div class="mt-7">
+                  <h3 class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-3">Idiomas</h3>
+                  <div id="pLanguages" class="text-[10px] text-slate-300 whitespace-pre-line"></div>
+                </div>
+              </div>
+              <div class="mt-auto pt-8 text-[8px] text-slate-600">CraftResume</div>
+            </aside>
+
+            <main id="resumeMain" class="flex-1 p-8 space-y-6 bg-white">
+              <section>
+                <h2 class="section-title">Perfil profissional</h2>
+                <p id="pSummary" class="body-text"></p>
+              </section>
+              <section>
+                <h2 class="section-title">Experiência profissional</h2>
+                <div id="pExperience"></div>
+              </section>
+              <section>
+                <h2 class="section-title">Formação</h2>
+                <div id="pEducation"></div>
+              </section>
+              <section>
+                <h2 class="section-title">Certificações</h2>
+                <p id="pCertifications" class="body-text whitespace-pre-line"></p>
+              </section>
+            </main>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- MOBILE BOTTOM NAVIGATION -->
+  <nav id="mobileNav" class="mobile-nav fixed bottom-0 left-0 right-0 z-[90] lg:hidden border-t border-slate-800/90 bg-slate-950/95 backdrop-blur-xl px-2 pb-[calc(8px+env(safe-area-inset-bottom))] pt-2">
+    <div class="grid grid-cols-3 gap-1 max-w-md mx-auto">
+      <button class="mobile-tab active" data-mobile-tab="edit">
+        <span class="mobile-tab-icon">✏️</span><span>Editar</span>
+      </button>
+      <button class="mobile-tab" data-mobile-tab="design">
+        <span class="mobile-tab-icon">🎨</span><span>Design</span>
+      </button>
+      <button class="mobile-tab" data-mobile-tab="preview">
+        <span class="mobile-tab-icon">👁️</span><span>Prévia</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- CHECKOUT / PIX -->
+  <div id="pixModal" class="hidden fixed inset-0 z-[100] bg-slate-950/85 backdrop-blur-md p-4 items-center justify-center">
+    <div class="w-full max-w-md rounded-3xl border border-slate-800 bg-slate-900 shadow-2xl p-6 relative">
+      <button id="closeModal" class="absolute right-4 top-4 text-slate-500 hover:text-white text-xl">×</button>
+      <div class="text-center">
+        <span class="inline-flex px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Liberação por Pix</span>
+        <h2 class="mt-3 text-2xl font-extrabold">Desbloqueie seu PDF</h2>
+        <p class="mt-1 text-sm text-slate-400">Pagamento único para liberar o download.</p>
+        <div class="mt-4 text-4xl font-black">R$ 19,90</div>
+      </div>
+
+      <div class="mt-6 rounded-2xl bg-white p-4 flex justify-center">
+        <div id="qrPlaceholder" class="w-44 h-44 flex items-center justify-center text-center text-xs text-slate-500 bg-slate-100 rounded-xl p-4">
+          QR Code Pix<br>será conectado ao seu provedor Pix
+        </div>
+      </div>
+
+      <div class="mt-4">
+        <label class="label">Pix Copia e Cola</label>
+        <div class="flex gap-2">
+          <input id="pixCode" class="field bg-slate-800!" readonly value="">
+          <button id="copyPix" class="shrink-0 px-4 rounded-xl bg-slate-800 border border-slate-700 text-xs font-bold">Copiar</button>
+        </div>
+      </div>
+
+      <div class="mt-4 rounded-xl border border-amber-500/20 bg-amber-500/5 p-3 text-xs text-slate-400">
+        <strong class="text-amber-300">Modo demonstração:</strong> esta versão não finge uma confirmação bancária. Para Pix real, conecte o seu backend/provedor e confirme o pagamento por webhook.
+      </div>
+
+      <button id="demoUnlock" class="mt-4 w-full rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 py-3 font-bold text-sm hover:brightness-110">
+        Liberar demonstração
+      </button>
+    </div>
+  </div>
+
+  <div id="toast" class="toast fixed bottom-5 left-1/2 -translate-x-1/2 z-[120] rounded-xl bg-slate-800 border border-slate-700 px-4 py-3 text-xs shadow-2xl"></div>
+
+  <style>
+    .label{display:block;color:#94a3b8;font-size:11px;margin-bottom:5px}
+    .field{width:100%;background:rgba(30,41,59,.55);border:1px solid rgba(71,85,105,.65);border-radius:12px;padding:10px 12px;color:#f1f5f9;font-size:12px;outline:none;transition:.2s}
+    textarea.field{line-height:1.45}
+    .section-title{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:#94a3b8;border-bottom:1px solid #e2e8f0;padding-bottom:5px;margin-bottom:9px}
+    .body-text{font-size:10px;line-height:1.65;color:#475569}
+    .exp-item{margin-bottom:16px}
+    .exp-head{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+    .exp-role{font-size:12px;font-weight:800;color:#0f172a}
+    .exp-date{font-size:9px;color:#94a3b8}
+    .exp-company{font-size:10px;font-weight:700;margin-top:2px;color:var(--accent)}
+    .exp-desc{font-size:10px;line-height:1.6;color:#475569;margin-top:5px;white-space:pre-line}
+    .edu-school{font-size:10px;font-weight:700;color:#0f172a}
+    .edu-course{font-size:10px;color:#475569;margin-top:2px}
+    .skill-pill{font-size:8px;background:#1e293b;color:#e2e8f0;padding:4px 6px;border-radius:5px;font-weight:600}
+    .clean-template #resumeSidebar{display:none}
+    .clean-template #resumeMain{padding:12mm}
+    .creative-template #resumeSidebar{width:26%;background:#fff;color:#0f172a;border-right:4px solid var(--accent)}
+    .creative-template #resumeSidebar .text-slate-300{color:#475569!important}
+    .creative-template #resumeSidebar .text-slate-400{color:#64748b!important}
+    .creative-template #resumeSidebar .border-slate-700{border-color:#e2e8f0!important}
+    .creative-template #resumeSidebar .text-white{color:#0f172a!important}
+    .creative-template .skill-pill{background:#f1f5f9;color:#334155}
+  </style>
+
+  <script>
+    const KEY = 'craftresume-pro-v2';
+    const defaults = {
+      name:'Lucas Silveira',
+      title:'Engenheiro de Software Sênior',
+      email:'lucas.silveira@tech.com',
+      phone:'(11) 98765-4321',
+      location:'São Paulo, SP',
+      summary:'Desenvolvedor Full-Stack com 8+ anos de experiência na criação de sistemas distribuídos de alta escala, arquiteturas orientadas a eventos e interfaces web de alta performance.',
+      skills:'React, Next.js, TypeScript, Node.js, Tailwind CSS, AWS',
+      languages:'Português — Nativo, Inglês — Avançado',
+      certifications:'AWS Certified Developer\\nMeta Front-End Developer',
+      color:'#2563eb',
+      template:'executive',
+      font:'Inter',
+      fontSize:'normal',
+      zoom:.70,
+      unlocked:false,
+      experiences:[
+        {role:'Líder Técnico Frontend', company:'Fintech X', date:'2022 — Atual', desc:'Arquitetou o novo design system em Next.js e Tailwind, reduzindo o tempo de carregamento em 40% e melhorando as métricas de conversão do produto.'}
+      ],
+      educations:[
+        {course:'Engenharia de Software', school:'Universidade de Tecnologia', date:'2016 — 2020'}
+      ]
+    };
+
+    let state = load();
+    const $ = id => document.getElementById(id);
+
+    function load(){
+      try { return {...defaults, ...JSON.parse(localStorage.getItem(KEY)||'{}')}; }
+      catch(e){ return {...defaults}; }
+    }
+    function save(){
+      const data = collect();
+      localStorage.setItem(KEY, JSON.stringify(data));
+      $('saveStatus').textContent='● Salvo';
+      $('saveStatus').className='text-[10px] text-emerald-400';
+    }
+    function collect(){
+      return {
+        ...state,
+        name:$('name').value,title:$('title').value,email:$('email').value,phone:$('phone').value,location:$('location').value,
+        summary:$('summary').value,skills:$('skills').value,languages:$('languages').value,certifications:$('certifications').value,
+        color:getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || state.color,
+        font:$('fontSelect').value,fontSize:$('fontSize').value,
+        experiences:[...document.querySelectorAll('.exp-form')].map(box=>({
+          role:box.querySelector('.exp-role-input').value, company:box.querySelector('.exp-company-input').value,
+          date:box.querySelector('.exp-date-input').value, desc:box.querySelector('.exp-desc-input').value
+        })),
+        educations:[...document.querySelectorAll('.edu-form')].map(box=>({
+          course:box.querySelector('.edu-course-input').value, school:box.querySelector('.edu-school-input').value,
+          date:box.querySelector('.edu-date-input').value
+        }))
+      };
+    }
+
+    function field(label, cls, value){
+      return `<label class="block"><span class="label">${label}</span><input class="field ${cls}" value="${escapeAttr(value||'')}"></label>`;
+    }
+    function escapeAttr(v){return String(v).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+    function renderForms(){
+      $('experienceList').innerHTML=state.experiences.map((x,i)=>`
+        <div class="exp-form rounded-2xl border border-slate-800 bg-slate-950/20 p-4">
+          <div class="flex justify-between mb-3"><span class="text-[10px] font-bold text-slate-500">Experiência ${i+1}</span>${state.experiences.length>1?`<button class="remove-exp text-[10px] text-rose-400" data-i="${i}">Remover</button>`:''}</div>
+          <div class="grid md:grid-cols-2 gap-3">
+            ${field('Cargo','exp-role-input',x.role)}
+            ${field('Empresa','exp-company-input',x.company)}
+            ${field('Período','exp-date-input',x.date)}
+          </div>
+          <label class="block mt-3"><span class="label">Descrição</span><textarea class="field exp-desc-input" rows="3">${escapeHtml(x.desc||'')}</textarea></label>
+        </div>`).join('');
+      $('educationList').innerHTML=state.educations.map((x,i)=>`
+        <div class="edu-form rounded-2xl border border-slate-800 bg-slate-950/20 p-4">
+          <div class="flex justify-between mb-3"><span class="text-[10px] font-bold text-slate-500">Formação ${i+1}</span>${state.educations.length>1?`<button class="remove-edu text-[10px] text-rose-400" data-i="${i}">Remover</button>`:''}</div>
+          ${field('Curso','edu-course-input',x.course)}
+          <div class="grid grid-cols-2 gap-3 mt-3">${field('Instituição','edu-school-input',x.school)}${field('Período','edu-date-input',x.date)}</div>
+        </div>`).join('');
+    }
+    function escapeHtml(v){return String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+    function hydrate(){
+      $('name').value=state.name;$('title').value=state.title;$('email').value=state.email;$('phone').value=state.phone;$('location').value=state.location;
+      $('summary').value=state.summary;$('skills').value=state.skills;$('languages').value=state.languages;$('certifications').value=state.certifications;
+      $('fontSelect').value=state.font;$('fontSize').value=state.fontSize;
+      document.documentElement.style.setProperty('--accent',state.color);
+      document.querySelectorAll('.color-dot').forEach(b=>b.classList.toggle('active',b.dataset.color.toLowerCase()===state.color.toLowerCase()));
+      renderForms(); renderPreview(); setZoom(state.zoom); setTemplate(state.template,false);
+      if(state.unlocked) unlockUI();
+    }
+
+    function renderPreview(){
+      $('pName').textContent=$('name').value||'Seu Nome';
+      $('pTitle').textContent=$('title').value||'Seu Cargo';
+      $('pEmail').textContent=$('email').value||'email@exemplo.com';
+      $('pPhone').textContent=$('phone').value||'(00) 00000-0000';
+      $('pLocation').textContent=$('location').value||'Cidade, Estado';
+      $('pSummary').textContent=$('summary').value||'Seu resumo profissional...';
+      $('pLanguages').textContent=$('languages').value||'Idiomas';
+      $('pCertifications').textContent=$('certifications').value||'Certificações';
+      $('pSkills').innerHTML=($('skills').value||'').split(',').map(s=>s.trim()).filter(Boolean).map(s=>`<span class="skill-pill">${escapeHtml(s)}</span>`).join('');
+      $('pExperience').innerHTML=state.experiences.map(x=>`
+        <div class="exp-item"><div class="exp-head"><div class="exp-role">${escapeHtml(x.role||'Cargo')}</div><div class="exp-date">${escapeHtml(x.date||'')}</div></div>
+        <div class="exp-company">${escapeHtml(x.company||'Empresa')}</div><div class="exp-desc">${escapeHtml(x.desc||'Descrição...')}</div></div>`).join('');
+      $('pEducation').innerHTML=state.educations.map(x=>`
+        <div class="mb-4"><div class="exp-head"><div><div class="edu-school">${escapeHtml(x.school||'Instituição')}</div><div class="edu-course">${escapeHtml(x.course||'Curso')}</div></div><div class="exp-date">${escapeHtml(x.date||'')}</div></div></div>`).join('');
+      $('resume-document').style.fontFamily=`"${$('fontSelect').value}", Arial, sans-serif`;
+      $('resume-document').classList.toggle('text-[95%]',false);
+      const compact=state.fontSize==='compact', large=state.fontSize==='large';
+      $('resume-document').style.setProperty('--scaleText',compact?'.92':large?'1.08':'1');
+      $('resumeMain').style.fontSize=compact?'.94em':large?'1.06em':'1em';
+      updateProgress();
+    }
+
+    function updateProgress(){
+      const vals=[$('name').value,$('title').value,$('email').value,$('phone').value,$('summary').value,$('skills').value,$('languages').value,$('certifications').value,
+        ...state.experiences.flatMap(x=>[x.role,x.company,x.desc]),...state.educations.flatMap(x=>[x.course,x.school])];
+      const filled=vals.filter(v=>String(v||'').trim()).length;
+      const pct=Math.min(100,Math.round(filled/Math.max(vals.length,1)*100));
+      $('progressText').textContent=pct+'%';$('progressBar').style.width=pct+'%';
+    }
+
+    function setAccent(c){
+      document.documentElement.style.setProperty('--accent',c); state.color=c;
+      document.querySelectorAll('.color-dot').forEach(b=>b.classList.toggle('active',b.dataset.color===c));
+      renderPreview();save();
+    }
+
+    function setTemplate(t, persist=true){
+      state.template=t;
+      const doc=$('resume-document');
+      doc.classList.remove('clean-template','creative-template');
+      if(t==='clean')doc.classList.add('clean-template');
+      if(t==='creative')doc.classList.add('creative-template');
+      $('previewTemplateName').textContent=t==='executive'?'Modern Executive':t==='clean'?'ATS Ultra-Clean':'Creative Minimal';
+      document.querySelectorAll('.template-card').forEach(b=>b.classList.toggle('active',b.dataset.template===t));
+      if(persist)save();
+    }
+
+    function fitMobilePreview(){
+      if(!document.body.classList.contains('mobile-preview-mode')) return;
+      // CSS pixels per millimeter is approximately 96/25.4.
+      // Fit the complete A4 width inside the available viewport.
+      const available = Math.max(280, window.innerWidth - 16);
+      const a4px = 210 * 96 / 25.4;
+      const fit = Math.min(0.95, available / a4px);
+      state.zoom = Math.max(0.35, fit);
+      $('previewScale').style.transform = `scale(${state.zoom})`;
+      $('previewScale').style.marginBottom = `-${(1-state.zoom)*297}mm`;
+      $('zoomLabel').textContent = Math.round(state.zoom*100)+'%';
+    }
+
+    function setZoom(z){
+      state.zoom=Math.min(1,Math.max(.45,z));
+      $('previewScale').style.transform=`scale(${state.zoom})`;
+      $('previewScale').style.marginBottom=`-${(1-state.zoom)*297}mm`;
+      $('zoomLabel').textContent=Math.round(state.zoom*100)+'%';
+    }
+
+    function toast(msg){
+      $('toast').textContent=msg;$('toast').classList.add('show');clearTimeout(window._toast);
+      window._toast=setTimeout(()=>$('toast').classList.remove('show'),2200);
+    }
+
+    function openModal(){
+      $('pixModal').classList.remove('hidden');$('pixModal').classList.add('flex');
+    }
+    function closeModal(){
+      $('pixModal').classList.add('hidden');$('pixModal').classList.remove('flex');
+    }
+    function unlockUI(){
+      state.unlocked=true;
+      $('watermark').style.display='none';
+      $('downloadTop').innerHTML='⚡ Baixar PDF HD';
+      $('downloadTop').className='rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-4 md:px-5 py-2.5 text-xs md:text-sm font-bold shadow-lg shadow-emerald-600/20 hover:brightness-110 active:scale-95 transition';
+      save();
+    }
+
+    async function downloadPDF(){
+      if(!state.unlocked){openModal();return;}
+      if(typeof html2pdf==='undefined'){toast('Biblioteca de PDF não carregou. Verifique sua conexão.');return;}
+      const watermark=$('watermark'); const old=watermark.style.display; watermark.style.display='none';
+      const element=$('resume-document');
+      const opt={margin:0,filename:'Meu_Curriculo_CraftResume.pdf',image:{type:'jpeg',quality:.98},html2canvas:{scale:2,useCORS:true,backgroundColor:'#ffffff'},jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}};
+      try{await html2pdf().set(opt).from(element).save();toast('PDF gerado com sucesso!');}
+      catch(e){console.error(e);toast('Não foi possível gerar o PDF.');}
+      watermark.style.display=old;
+    }
+
+    function addExperience(){
+      state=collect();state.experiences.push({role:'Novo cargo',company:'Empresa',date:'2024 — Atual',desc:'Descreva suas principais responsabilidades e resultados.'});renderForms();bindDynamic();renderPreview();save();
+    }
+    function addEducation(){
+      state=collect();state.educations.push({course:'Novo curso',school:'Instituição',date:'2020 — 2024'});renderForms();bindDynamic();renderPreview();save();
+    }
+    function bindDynamic(){
+      document.querySelectorAll('.remove-exp').forEach(b=>b.onclick=()=>{state=collect();state.experiences.splice(+b.dataset.i,1);renderForms();bindDynamic();renderPreview();save()});
+      document.querySelectorAll('.remove-edu').forEach(b=>b.onclick=()=>{state=collect();state.educations.splice(+b.dataset.i,1);renderForms();bindDynamic();renderPreview();save()});
+      document.querySelectorAll('.exp-form input,.exp-form textarea,.edu-form input').forEach(el=>el.oninput=()=>{state=collect();renderPreview();save()});
+    }
+
+    function setMobileTab(tab){
+      document.body.classList.remove('mobile-edit-mode','mobile-design-mode','mobile-preview-mode');
+      document.body.classList.add('mobile-'+tab+'-mode');
+      document.querySelectorAll('.mobile-tab').forEach(btn=>{
+        btn.classList.toggle('active',btn.dataset.mobileTab===tab);
+      });
+      if(tab==='preview'){
+        // Fit the A4 page to the phone width on entry, without changing desktop zoom.
+        const available=Math.max(280, window.innerWidth-24);
+        const a4CssPx=793.7; // 210mm at 96dpi
+        const fit=Math.min(.62, Math.max(.42, available/a4CssPx));
+        setZoom(fit);
+      }
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+
+    document.addEventListener('DOMContentLoaded',()=>{
+      hydrate();
+      document.body.classList.add('mobile-edit-mode');
+      document.querySelectorAll('.mobile-tab').forEach(btn=>{
+        btn.addEventListener('click',()=>setMobileTab(btn.dataset.mobileTab));
+      });
+      window.addEventListener('resize',()=>{
+        if(document.body.classList.contains('mobile-preview-mode')){
+          const available=Math.max(280, window.innerWidth-24);
+          setZoom(Math.min(.62,Math.max(.42,available/793.7)));
+        }
+      });
+      ['name','title','email','phone','location','summary','skills','languages','certifications','fontSelect','fontSize'].forEach(id=>{
+        $(id).addEventListener('input',()=>{state=collect();renderPreview();save()});
+        $(id).addEventListener('change',()=>{state=collect();renderPreview();save()});
+      });
+      bindDynamic();
+      $('addExperience').onclick=addExperience;$('addEducation').onclick=addEducation;
+      $('zoomMinus').onclick=()=>{setZoom(state.zoom-.05);save()};$('zoomPlus').onclick=()=>{setZoom(state.zoom+.05);save()};
+      document.querySelectorAll('.color-dot').forEach(b=>b.onclick=()=>setAccent(b.dataset.color));
+      document.querySelectorAll('.template-card').forEach(b=>b.onclick=()=>setTemplate(b.dataset.template));
+      $('downloadTop').onclick=()=>state.unlocked?downloadPDF():openModal();
+      $('closeModal').onclick=closeModal;
+      $('pixModal').addEventListener('click',e=>{if(e.target===$('pixModal'))closeModal()});
+      $('copyPix').onclick=async()=>{
+        const code=$('pixCode').value;
+        if(!code){toast('O código Pix ainda não foi configurado.');return}
+        try{await navigator.clipboard.writeText(code);toast('Código Pix copiado!')}catch(e){toast('Não foi possível copiar automaticamente.')}
+      };
+      $('demoUnlock').onclick=()=>{unlockUI();closeModal();downloadPDF()};
+      window.addEventListener('resize',()=>fitMobilePreview());
+
+      $('summarySuggestion').onclick=()=>{
+        $('summary').value='Profissional com experiência em desenvolvimento de soluções digitais, foco em performance, qualidade de código e colaboração entre equipes. Experiência em transformar requisitos de negócio em produtos escaláveis e experiências eficientes para usuários.';
+        state=collect();renderPreview();save();toast('Resumo atualizado.');
+      };
+    });
+  </script>
+</body>
+</html>
